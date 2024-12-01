@@ -1,0 +1,91 @@
+// Define constants for pins
+const int leftMotorForward = 2;
+const int leftMotorBackward = 3;
+const int rightMotorForward = 4;
+const int rightMotorBackward = 5;
+const int ultrasonicTrigger = 6;
+const int ultrasonicEcho = 7;
+const int lineSensorLeft = 8;
+const int lineSensorRight = 9;
+
+void setup() {
+  // Initialize motor pins as output
+  pinMode(leftMotorForward, OUTPUT);
+  pinMode(leftMotorBackward, OUTPUT);
+  pinMode(rightMotorForward, OUTPUT);
+  pinMode(rightMotorBackward, OUTPUT);
+  
+  // Initialize ultrasonic sensor pins
+  pinMode(ultrasonicTrigger, OUTPUT);
+  pinMode(ultrasonicEcho, INPUT);
+  
+  // Initialize line sensor pins as input
+  pinMode(lineSensorLeft, INPUT);
+  pinMode(lineSensorRight, INPUT);
+}
+
+void loop() {
+  // Read line sensors
+  int leftLine = digitalRead(lineSensorLeft);
+  int rightLine = digitalRead(lineSensorRight);
+  
+  // Read ultrasonic sensor
+  int distance = getDistance();
+  
+  // Follow line
+  if (leftLine == 1 && rightLine == 0) {
+    turnRight();
+  } else if (leftLine == 0 && rightLine == 1) {
+    turnLeft();
+  } else if (leftLine == 1 && rightLine == 1) {
+    moveForward();
+  } else {
+    stopRobot();
+  }
+  
+  // Obstacle avoidance
+  if (distance < 20) {
+    stopRobot();
+    delay(500);
+    reverseRobot();
+    delay(500);
+  }
+}
+
+int getDistance() {
+  // Trigger ultrasonic sensor
+  digitalWrite(ultrasonicTrigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(ultrasonicTrigger, LOW);
+  
+  // Calculate distance
+  int duration = pulseIn(ultrasonicEcho, HIGH);
+  return duration * 0.034 / 2;
+}
+
+void turnRight() {
+  digitalWrite(leftMotorForward, HIGH);
+  digitalWrite(rightMotorBackward, HIGH);
+}
+
+void turnLeft() {
+  digitalWrite(leftMotorBackward, HIGH);
+  digitalWrite(rightMotorForward, HIGH);
+}
+
+void moveForward() {
+  digitalWrite(leftMotorForward, HIGH);
+  digitalWrite(rightMotorForward, HIGH);
+}
+
+void stopRobot() {
+  digitalWrite(leftMotorForward, LOW);
+  digitalWrite(rightMotorBackward, LOW);
+  digitalWrite(rightMotorForward, LOW);
+  digitalWrite(leftMotorBackward, LOW);
+}
+
+void reverseRobot() {
+  digitalWrite(leftMotorBackward, HIGH);
+  digitalWrite(rightMotorBackward, HIGH);
+}
